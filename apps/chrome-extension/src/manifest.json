@@ -1,0 +1,13 @@
+{
+  "name": "Nova Scotia COVID News",
+  "version": "1.0",
+  "description": "Displays latest NS COVID News",
+  "manifest_version": 2,
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "permissions": [
+    "background"
+  ]
+}
