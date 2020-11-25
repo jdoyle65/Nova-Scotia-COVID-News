@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
 
 @Entity()
-export class NsNewsFeed {
+export class NsNewsRelease {
   @PrimaryColumn()
   id!: string;
 

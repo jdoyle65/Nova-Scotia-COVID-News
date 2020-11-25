@@ -2,8 +2,8 @@ import { Request, Response, Router } from "express";
 import { query, validationResult } from "express-validator";
 import { FindManyOptions, getRepository, MoreThanOrEqual } from "typeorm";
 
-import { NsDataEntry } from "../../entity/NsDataEntry";
-import { NsNewsFeed } from "../../entity/NsNewsFeed";
+import { NsCaseData } from "../../entity/NsCaseData";
+import { NsNewsRelease } from "../../entity/NsNewsRelease";
 
 const api = Router({ mergeParams: true });
 
@@ -11,12 +11,12 @@ api.get(
   "/feed",
   [query("after").isDate().optional()],
   async (req: Request, res: Response) => {
-    const newsQuery: FindManyOptions<NsNewsFeed> = {
+    const newsQuery: FindManyOptions<NsNewsRelease> = {
       order: { published: "DESC" },
       take: 500,
     };
 
-    const dataQuery: FindManyOptions<NsDataEntry> = {
+    const dataQuery: FindManyOptions<NsCaseData> = {
       order: { date: "DESC" },
       take: 500,
     };
@@ -27,8 +27,16 @@ api.get(
       return res.status(422).json(error);
     }
 
-    const newsRepo = getRepository(NsNewsFeed);
-    const dataRepo = getRepository(NsDataEntry);
+    const { after } = req.query;
+
+    if (after) {
+      const date = new Date(after as string);
+      newsQuery.where = { published: MoreThanOrEqual(date) };
+      dataQuery.where = { date: MoreThanOrEqual(date) };
+    }
+
+    const newsRepo = getRepository(NsNewsRelease);
+    const dataRepo = getRepository(NsCaseData);
 
     try {
       const newsResult = await newsRepo.find(newsQuery);
@@ -57,12 +65,12 @@ api.get(
 );
 
 api.get("/news", async (req, res) => {
-  const queryOptions: FindManyOptions<NsNewsFeed> = {
+  const queryOptions: FindManyOptions<NsNewsRelease> = {
     order: { published: "DESC" },
     take: 500,
   };
 
-  const repo = getRepository(NsNewsFeed);
+  const repo = getRepository(NsNewsRelease);
   try {
     const data = await repo.find(queryOptions);
     return res.json({ data });
@@ -73,7 +81,7 @@ api.get("/news", async (req, res) => {
 
 api.get("/news/:id", async (req, res) => {
   const { id } = req.params;
-  const repo = getRepository(NsNewsFeed);
+  const repo = getRepository(NsNewsRelease);
   try {
     const result = await repo.findOne(id);
 
@@ -98,7 +106,7 @@ api.get(
     }
 
     const { after } = req.query;
-    const queryOptions: FindManyOptions<NsDataEntry> = {
+    const queryOptions: FindManyOptions<NsCaseData> = {
       order: { date: "DESC" },
       take: 500,
     };
@@ -109,7 +117,7 @@ api.get(
       };
     }
 
-    const repo = getRepository(NsDataEntry);
+    const repo = getRepository(NsCaseData);
 
     try {
       const results = await repo.find(queryOptions);
@@ -123,7 +131,7 @@ api.get(
 
 api.get("/data/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
-  const repo = getRepository(NsDataEntry);
+  const repo = getRepository(NsCaseData);
 
   try {
     const result = await repo.findOne(id);

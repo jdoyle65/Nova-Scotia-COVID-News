@@ -2,8 +2,8 @@ import { getRepository } from "typeorm";
 
 import { Scheduler } from "./Scheduler";
 import { NsCovidData, NsNewsFeed } from "../../services";
-import { NsDataEntry } from "../../entity/NsDataEntry";
-import { NsNewsFeed as NsNewsFeedEntity } from "../../entity/NsNewsFeed";
+import { NsCaseData } from "../../entity/NsCaseData";
+import { NsNewsRelease as NsNewsFeedEntity } from "../../entity/NsNewsRelease";
 
 export class NsDataScheduler extends Scheduler {
   protected async process() {
@@ -14,7 +14,7 @@ export class NsDataScheduler extends Scheduler {
   private async syncCovidData() {
     try {
       const data = await NsCovidData.getData();
-      const nsDataRepository = getRepository(NsDataEntry);
+      const nsDataRepository = getRepository(NsCaseData);
       const entities = nsDataRepository.create(data);
       const result = await nsDataRepository.save(entities);
 

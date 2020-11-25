@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
 
 @Entity()
-export class NsDataEntry {
+export class NsCaseData {
   @PrimaryColumn()
   id!: number;
 
