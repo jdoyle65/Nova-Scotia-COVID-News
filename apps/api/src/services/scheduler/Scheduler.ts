@@ -1,11 +1,20 @@
 export class Scheduler {
   private timeout?: NodeJS.Timeout;
-  private enabled = false;
+  private _isEnabled = false;
+  private _isRunning = false;
+
+  get isEnabled() {
+    return this._isEnabled;
+  }
+
+  get isRunning() {
+    return this._isRunning;
+  }
 
   constructor(private delay: number) {}
 
   start() {
-    this.enabled = true;
+    this._isEnabled = true;
 
     if (!this.timeout) {
       this.startProcess();
@@ -13,7 +22,7 @@ export class Scheduler {
   }
 
   stop() {
-    this.enabled = false;
+    this._isEnabled = false;
 
     if (this.timeout) {
       clearTimeout(this.timeout);
@@ -30,8 +39,11 @@ export class Scheduler {
 
   private startProcess() {
     this.timeout = setTimeout(async () => {
-      if (this.enabled) {
+      if (this._isEnabled) {
+        this._isRunning = true;
         await this.process();
+
+        this._isRunning = false;
         this.startProcess();
       }
     }, this.delay);

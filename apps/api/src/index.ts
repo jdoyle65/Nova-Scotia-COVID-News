@@ -3,14 +3,18 @@ import cors from "cors";
 import bodyParser = require("body-parser");
 
 import { createConnection } from "typeorm";
+import { SnakeNamingStrategy } from "typeorm-naming-strategies";
 
 // Entities
-import { NsDataEntry } from "./entity/NsDataEntry";
-import { NsNewsFeed } from "./entity/NsNewsFeed";
+import { NsCaseData } from "./entity/NsCaseData";
+import { NsNewsRelease } from "./entity/NsNewsRelease";
 
 // Routes
 import { router } from "./routes";
+
+// Services
 import { NsDataScheduler } from "./services/scheduler/NsDataScheduler";
+import { ScheduleManager } from "./services/scheduler/SchedulerManager";
 
 async function run() {
   const connection = await createConnection({
@@ -19,11 +23,11 @@ async function run() {
     port: 5432,
     username: "postgres",
     password: "foobar",
-    // database: "news",
     synchronize: true,
     logging: false,
-    entities: [NsDataEntry, NsNewsFeed],
+    entities: [NsCaseData, NsNewsRelease],
     migrations: ["./migration/**/*.ts"],
+    namingStrategy: new SnakeNamingStrategy(),
   });
 
   const app = express();
@@ -34,11 +38,11 @@ async function run() {
 
   app.listen(8080, () => console.log("listening"));
 
-  const s = new NsDataScheduler(5000);
-  s.start();
-  setTimeout(() => {
-    s.stop();
-  }, 5250);
+  const scheduleInterval = 1000 * 60 * 5; // 5 minutes
+
+  const schedulerManager = ScheduleManager.instance;
+  schedulerManager.registerService(NsDataScheduler, scheduleInterval);
+  schedulerManager.startServices();
 }
 
 run();
